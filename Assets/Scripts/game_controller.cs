@@ -164,7 +164,7 @@ public class game_controller : MonoBehaviour
                             {
                                 if (value[i, j, k] == 0)
                                 {
-                                    for(int finder = i+1; finder <= 2; ++finder)
+                                    for(int finder = i + 1; finder <= 2; ++finder)
                                     {
                                         if(value[finder, j, k] != 0)
                                         {
@@ -204,7 +204,7 @@ public class game_controller : MonoBehaviour
                             {
                                 if (value[i, j, k] == 0)
                                 {
-                                    for (int finder = j-1; finder >= 0; --finder)
+                                    for (int finder = j - 1; finder >= 0; --finder)
                                     {
                                         if (value[i, finder, k] != 0)
                                         {
@@ -242,7 +242,7 @@ public class game_controller : MonoBehaviour
                             {
                                 if (value[i, j, k] == 0)
                                 {
-                                    for (int finder = j+1; finder <= 2; ++finder)
+                                    for (int finder = j + 1; finder <= 2; ++finder)
                                     {
                                         if (value[i, finder, k] != 0)
                                         {
@@ -282,7 +282,7 @@ public class game_controller : MonoBehaviour
                             {
                                 if (value[i, j, k] == 0)
                                 {
-                                    for (int finder = k-1; finder >= 0; --finder)
+                                    for (int finder = k - 1; finder >= 0; --finder)
                                     {
                                         if (value[i, j, finder] != 0)
                                         {
@@ -320,7 +320,7 @@ public class game_controller : MonoBehaviour
                             {
                                 if (value[i, j, k] == 0)
                                 {
-                                    for (int finder = k+1; finder <= 2; ++finder)
+                                    for (int finder = k + 1; finder <= 2; ++finder)
                                     {
                                         if (value[i, j, finder] != 0)
                                         {
@@ -335,7 +335,7 @@ public class game_controller : MonoBehaviour
                                 {
                                     for (int finder = k + 1; finder <= 2; ++finder)
                                     {
-                                        if (value[i, j, finder] != value[i, j, k])
+                                        if (value[i, j, finder] == value[i, j, k])
                                         {
                                             moved = true;
                                             value[i, j, k] *= 2;
