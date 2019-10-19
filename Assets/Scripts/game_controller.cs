@@ -7,7 +7,7 @@ public class game_controller : MonoBehaviour
     bool needUpdate = false;
     GameObject textPrefab;
     GameObject[] numList;
-    GameObject touchedCapsule;
+    GameObject[] cubeList;
     // Start is called before the first frame update
     void Start()
     {
@@ -21,6 +21,19 @@ public class game_controller : MonoBehaviour
         needUpdate = true;
 
         textPrefab = GameObject.Find("Text Prefab");//Object.Instantiate(textPrefab).GetComponent<Projectile>();
+        cubeList = new GameObject[27];
+
+        for (int i = 0; i < 3; ++i)
+        {
+            for (int j = 0; j < 3; ++j)
+            {
+                for (int k = 0; k < 3; ++k)
+                {
+                    cubeList[9 * i + 3 * j + k] = GameObject.Find("Cube " + i + "_" + j + "_" + k);
+                }
+            }
+        }
+
         numList = new GameObject[27];
     }
 
@@ -84,12 +97,14 @@ public class game_controller : MonoBehaviour
                             if (numList[i * 9 + j * 3 + k] != null)
                             {
                                 Destroy(numList[i * 9 + j * 3 + k]);
+                                numList[i * 9 + j * 3 + k] = null;
                             }
                             GameObject cube = GameObject.Find("Cube " + i + "_" + j + "_" + k);
-                            numList[i * 9 + j * 3 + k] = Object.Instantiate(textPrefab);
-                            numList[i * 9 + j * 3 + k].transform.parent = cube.transform;
-                            numList[i * 9 + j * 3 + k].transform.position = cube.transform.position;
-                            numList[i * 9 + j * 3 + k].GetComponent<TextMesh>().text = value[i, j, k].ToString();
+                            GameObject text = Object.Instantiate(textPrefab);
+                            text.transform.parent = cube.transform;
+                            text.transform.position = cube.transform.position;
+                            text.GetComponent<TextMesh>().text = value[i, j, k].ToString();
+                            numList[i * 9 + j * 3 + k] = text;
                         }
 
                         numList[i * 9 + j * 3 + k].GetComponent<TextMesh>().transform.LookAt(
@@ -101,6 +116,7 @@ public class game_controller : MonoBehaviour
                         if (numList[i * 9 + j * 3 + k] != null)
                         {
                             Destroy(numList[i * 9 + j * 3 + k]);
+                            numList[i * 9 + j * 3 + k] = null;
                         }
                     }
                 }
