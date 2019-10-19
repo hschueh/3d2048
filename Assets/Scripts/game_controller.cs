@@ -99,7 +99,7 @@ public class game_controller : MonoBehaviour
                                 Destroy(numList[i * 9 + j * 3 + k]);
                                 numList[i * 9 + j * 3 + k] = null;
                             }
-                            GameObject cube = GameObject.Find("Cube " + i + "_" + j + "_" + k);
+                            GameObject cube = cubeList[i * 9 + j * 3 + k];
                             GameObject text = Object.Instantiate(textPrefab);
                             text.transform.parent = cube.transform;
                             text.transform.position = cube.transform.position;
@@ -153,7 +153,8 @@ public class game_controller : MonoBehaviour
                                         }
                                     }
                                 }
-                                else
+
+                                if (value[i, j, k] != 0)
                                 {
                                     for (int finder = i - 1; finder >= 0; --finder)
                                     {
@@ -191,7 +192,8 @@ public class game_controller : MonoBehaviour
                                         }
                                     }
                                 }
-                                else
+
+                                if (value[i, j, k] != 0)
                                 {
                                     for (int finder = i + 1; finder <= 2; ++finder)
                                     {
@@ -231,7 +233,8 @@ public class game_controller : MonoBehaviour
                                         }
                                     }
                                 }
-                                else
+
+                                if (value[i, j, k] != 0)
                                 {
                                     for (int finder = j - 1; finder >= 0; --finder)
                                     {
@@ -269,7 +272,8 @@ public class game_controller : MonoBehaviour
                                         }
                                     }
                                 }
-                                else
+
+                                if (value[i, j, k] != 0)
                                 {
                                     for (int finder = j + 1; finder <= 2; ++finder)
                                     {
@@ -309,7 +313,8 @@ public class game_controller : MonoBehaviour
                                         }
                                     }
                                 }
-                                else
+
+                                if (value[i, j, k] != 0)
                                 {
                                     for (int finder = k - 1; finder >= 0; --finder)
                                     {
@@ -347,7 +352,8 @@ public class game_controller : MonoBehaviour
                                         }
                                     }
                                 }
-                                else
+
+                                if (value[i, j, k] != 0)
                                 {
                                     for (int finder = k + 1; finder <= 2; ++finder)
                                     {
