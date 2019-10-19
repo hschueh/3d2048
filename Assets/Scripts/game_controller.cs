@@ -8,7 +8,18 @@ public class game_controller : MonoBehaviour
     GameObject textPrefab;
     GameObject[] numList;
     GameObject[] cubeList;
-    // Start is called before the first frame update
+    Material[] materialList;
+    Color[] colors = {
+        new Color32(192, 180, 164, 128),
+        new Color32(233, 221, 209, 128),
+        new Color32(232, 217, 189, 128),
+        new Color32(238, 162, 102, 128),
+        new Color32(240, 130, 80, 128),
+        new Color32(241, 101, 77, 128),
+        new Color32(241, 71, 45, 128),
+        new Color32(232, 198, 95, 128),
+        new Color32(232, 195, 80, 128)
+    };
     void Start()
     {
         value = new int[3, 3, 3]  {
@@ -22,7 +33,7 @@ public class game_controller : MonoBehaviour
 
         textPrefab = GameObject.Find("Text Prefab");//Object.Instantiate(textPrefab).GetComponent<Projectile>();
         cubeList = new GameObject[27];
-
+        materialList = new Material[27];
         for (int i = 0; i < 3; ++i)
         {
             for (int j = 0; j < 3; ++j)
@@ -30,6 +41,7 @@ public class game_controller : MonoBehaviour
                 for (int k = 0; k < 3; ++k)
                 {
                     cubeList[9 * i + 3 * j + k] = GameObject.Find("Cube " + i + "_" + j + "_" + k);
+                    materialList[9 * i + 3 * j + k] = cubeList[9 * i + 3 * j + k].GetComponent<Renderer>().material;
                 }
             }
         }
@@ -59,17 +71,6 @@ public class game_controller : MonoBehaviour
                     move(2, raycastHit.collider.transform.localPosition.z > 0);
                 }
             }
-            //Touch touch = Input.GetTouch(0);
-
-            //// Handle finger movements based on TouchPhase
-            //switch (touch.phase)
-            //{
-            //    //When a touch has first been detected, change the message and record the starting position
-            //    case TouchPhase.Began:
-            //        break;
-            //    case TouchPhase.Ended:
-            //        break;
-            //}
         }
 
         if (Input.touchCount == 1)
@@ -105,6 +106,7 @@ public class game_controller : MonoBehaviour
                             text.transform.position = cube.transform.position;
                             text.GetComponent<TextMesh>().text = value[i, j, k].ToString();
                             numList[i * 9 + j * 3 + k] = text;
+                            materialList[i * 9 + j * 3 + k].color = (Color)colors[(int)Mathf.Log(value[i, j, k], 2)];
                         }
 
                         numList[i * 9 + j * 3 + k].GetComponent<TextMesh>().transform.LookAt(
@@ -117,6 +119,10 @@ public class game_controller : MonoBehaviour
                         {
                             Destroy(numList[i * 9 + j * 3 + k]);
                             numList[i * 9 + j * 3 + k] = null;
+                        }
+                        if (!cubeList[i * 9 + j * 3 + k].GetComponent<Renderer>().material.color.Equals(colors[0]))
+                        {
+                            cubeList[i * 9 + j * 3 + k].GetComponent<Renderer>().material.color = colors[0];
                         }
                     }
                 }
