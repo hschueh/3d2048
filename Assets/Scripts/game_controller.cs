@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using GoogleMobileAds.Api;
 
 public class game_controller : MonoBehaviour
 {
@@ -9,26 +10,68 @@ public class game_controller : MonoBehaviour
     GameObject[] numList;
     GameObject[] cubeList;
     Material[] materialList;
+
+
+    private BannerView bannerView;
+    private void RequestBanner()
+    {
+        // Create a 320x50 banner at the top of the screen.
+        bannerView = new BannerView(bannerId, AdSize.SmartBanner, AdPosition.BottomLeft);
+
+        // Create an empty ad request.
+        AdRequest request = new AdRequest.Builder().Build();
+
+        // Load the banner with the request.
+        bannerView.LoadAd(request);
+    }
+#if UNITY_ANDROID
+    string appId = "ca-app-pub-3940256099942544~3347511713";
+    string bannerId = "ca-app-pub-3940256099942544/6300978111";
+#elif UNITY_IPHONE
+    string appId = "ca-app-pub-3940256099942544~1458002511";
+    string bannerId = "ca-app-pub-3940256099942544/2934735716";
+#else
+    string appId = "unexpected_platform";
+    string bannerId = "unexpected_platform";
+#endif
+
     Color[] colors = {
-        new Color32(192, 180, 164, 128),
-        new Color32(233, 221, 209, 128),
-        new Color32(232, 217, 189, 128),
-        new Color32(238, 162, 102, 128),
-        new Color32(240, 130, 80, 128),
-        new Color32(241, 101, 77, 128),
-        new Color32(241, 71, 45, 128),
-        new Color32(232, 198, 95, 128),
-        new Color32(232, 195, 80, 128)
+        new Color32(192, 180, 164, 96),
+        new Color32(255, 0 , 0, 96),
+        new Color32(255, 127, 0, 96),
+        new Color32(255, 255, 0, 96),
+        new Color32(0, 255, 0, 96),
+        new Color32(0, 0, 255, 96),
+        new Color32(75, 0, 130, 96),
+        new Color32(148, 0, 211, 96),
+        new Color32(255, 0 , 0, 128),
+        new Color32(255, 127, 0, 128),
+        new Color32(255, 255, 0, 128),
+        new Color32(0, 255, 0, 128),
+        new Color32(0, 0, 255, 128),
+        new Color32(75, 0, 130, 128),
+        new Color32(148, 0, 211, 128),
+        new Color32(255, 0 , 0, 192),
+        new Color32(255, 127, 0, 192),
+        new Color32(255, 255, 0, 192),
+        new Color32(0, 255, 0, 192),
+        new Color32(0, 0, 255, 192),
+        new Color32(75, 0, 130, 192),
+        new Color32(148, 0, 211, 192),
     };
+
     void Start()
     {
+        MobileAds.Initialize(appId);
+        RequestBanner();
+
         value = new int[3, 3, 3]  {
                                     { { 0,0,0 }, { 0,0,0 } , { 0,0,0 } },
                                     { { 0,0,0 }, { 0,0,0 } , { 0,0,0 } },
                                     { { 0,0,0 }, { 0,0,0 } , { 0,0,0 } }
                                   };
 
-        randomAdd();
+        RandomAdd();
         needUpdate = true;
 
         textPrefab = GameObject.Find("Text Prefab");//Object.Instantiate(textPrefab).GetComponent<Projectile>();
@@ -60,15 +103,15 @@ public class game_controller : MonoBehaviour
             {
                 if(System.Math.Abs(raycastHit.collider.transform.localPosition.x) > EPSILON)
                 {
-                    move(0, raycastHit.collider.transform.localPosition.x > 0);
+                    Move(0, raycastHit.collider.transform.localPosition.x > 0);
                 }
                 else if (System.Math.Abs(raycastHit.collider.transform.localPosition.y) > EPSILON)
                 {
-                    move(1, raycastHit.collider.transform.localPosition.y > 0);
+                    Move(1, raycastHit.collider.transform.localPosition.y > 0);
                 }
                 else if (System.Math.Abs(raycastHit.collider.transform.localPosition.z) > EPSILON)
                 {
-                    move(2, raycastHit.collider.transform.localPosition.z > 0);
+                    Move(2, raycastHit.collider.transform.localPosition.z > 0);
                 }
             }
         }
@@ -131,7 +174,7 @@ public class game_controller : MonoBehaviour
         needUpdate = false;
     }
 
-    void move(int dir, bool pos)
+    void Move(int dir, bool pos)
     {
         Debug.Log("move: "+dir+", "+(pos?"POS":"NEG"));
         bool moved = false;
@@ -381,12 +424,12 @@ public class game_controller : MonoBehaviour
 
         if (moved)
         {
-            randomAdd();
+            RandomAdd();
             needUpdate = true;
         }
     }
 
-    void randomAdd()
+    void RandomAdd()
     {
         while (true)
         {
