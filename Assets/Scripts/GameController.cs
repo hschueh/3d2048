@@ -12,6 +12,8 @@ public class GameController : MonoBehaviour
     GameObject[] cubeList;
     GameObject endGameUICanvas;
     Material[] materialList;
+    Animator[] animatorList;
+    int[] animatorStateList;
 
     private BannerView bannerView;
     private void RequestBanner()
@@ -53,13 +55,14 @@ public class GameController : MonoBehaviour
 
     void Start()
     {
-        MobileAds.Initialize(Constants.appId);
-        RequestBanner();
+        //MobileAds.Initialize(Constants.appId);
+        //RequestBanner();
 
         textPrefab = GameObject.Find("Text Prefab");
         endGameUICanvas = GameObject.Find("EndGameUICanvas");
         cubeList = new GameObject[27];
         materialList = new Material[27];
+        animatorList = new Animator[27];
         for (int i = 0; i < 3; ++i)
         {
             for (int j = 0; j < 3; ++j)
@@ -68,6 +71,7 @@ public class GameController : MonoBehaviour
                 {
                     cubeList[9 * i + 3 * j + k] = GameObject.Find("Cube " + i + "_" + j + "_" + k);
                     materialList[9 * i + 3 * j + k] = cubeList[9 * i + 3 * j + k].GetComponent<Renderer>().material;
+                    animatorList[9 * i + 3 * j + k] = cubeList[9 * i + 3 * j + k].GetComponent<Animator>();
                 }
             }
         }
@@ -138,7 +142,16 @@ public class GameController : MonoBehaviour
                             text.GetComponent<TextMesh>().text = value[i, j, k].ToString();
                             numList[i * 9 + j * 3 + k] = text;
                             materialList[i * 9 + j * 3 + k].color = (Color)colors[(int)Mathf.Log(value[i, j, k], 2)];
-                            if(!CheckAlive())
+                            if(animatorStateList[9 * i + 3 * j + k] == 1)
+                            {
+                                animatorList[9 * i + 3 * j + k].Play("bounce");
+                                animatorStateList[9 * i + 3 * j + k] = 0;
+                            }
+                            else
+                            {
+                                animatorList[9 * i + 3 * j + k].Play("shrink");
+                            }
+                            if (!CheckAlive())
                             {
                                 Endgame();
                             }
@@ -218,6 +231,7 @@ public class GameController : MonoBehaviour
                                             {
                                                 value[i, j, k] *= 2;
                                                 value[finder, j, k] = 0;
+                                                animatorStateList[9 * i + 3 * j + k] = 1;
                                             }
                                             moved = true;
                                             break;
@@ -267,6 +281,7 @@ public class GameController : MonoBehaviour
                                             {
                                                 value[i, j, k] *= 2;
                                                 value[finder, j, k] = 0;
+                                                animatorStateList[9 * i + 3 * j + k] = 1;
                                             }
                                             moved = true;
                                             break;
@@ -318,6 +333,7 @@ public class GameController : MonoBehaviour
                                             {
                                                 value[i, j, k] *= 2;
                                                 value[i, finder, k] = 0;
+                                                animatorStateList[9 * i + 3 * j + k] = 1;
                                             }
                                             moved = true;
                                             break;
@@ -367,6 +383,7 @@ public class GameController : MonoBehaviour
                                             {
                                                 value[i, j, k] *= 2;
                                                 value[i, finder, k] = 0;
+                                                animatorStateList[9 * i + 3 * j + k] = 1; ;
                                             }
                                             moved = true;
                                             break;
@@ -418,6 +435,7 @@ public class GameController : MonoBehaviour
                                             {
                                                 value[i, j, k] *= 2;
                                                 value[i, j, finder] = 0;
+                                                animatorStateList[9 * i + 3 * j + k] = 1;
                                             }
                                             moved = true;
                                             break;
@@ -467,6 +485,7 @@ public class GameController : MonoBehaviour
                                             {
                                                 value[i, j, k] *= 2;
                                                 value[i, j, finder] = 0;
+                                                animatorStateList[9 * i + 3 * j + k] = 1;
                                             }
                                             moved = true;
                                             break;
@@ -518,7 +537,7 @@ public class GameController : MonoBehaviour
                                     { { 0,0,0 }, { 0,0,0 } , { 0,0,0 } },
                                     { { 0,0,0 }, { 0,0,0 } , { 0,0,0 } }
                                   };
-
+        animatorStateList = new int[27];
         RandomAdd();
         needUpdate = true;
         inGame = true;
