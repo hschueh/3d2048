@@ -6,11 +6,12 @@ public class GameController : MonoBehaviour
     const float EPSILON = 0.1f;
     int[,,] value;
     bool needUpdate = false;
+    bool inGame = false;
     GameObject textPrefab;
     GameObject[] numList;
     GameObject[] cubeList;
+    GameObject endGameUICanvas;
     Material[] materialList;
-
 
     private BannerView bannerView;
     private void RequestBanner()
@@ -55,16 +56,8 @@ public class GameController : MonoBehaviour
         MobileAds.Initialize(Constants.appId);
         RequestBanner();
 
-        value = new int[3, 3, 3]  {
-                                    { { 0,0,0 }, { 0,0,0 } , { 0,0,0 } },
-                                    { { 0,0,0 }, { 0,0,0 } , { 0,0,0 } },
-                                    { { 0,0,0 }, { 0,0,0 } , { 0,0,0 } }
-                                  };
-
-        RandomAdd();
-        needUpdate = true;
-
-        textPrefab = GameObject.Find("Text Prefab");//Object.Instantiate(textPrefab).GetComponent<Projectile>();
+        textPrefab = GameObject.Find("Text Prefab");
+        endGameUICanvas = GameObject.Find("EndGameUICanvas");
         cubeList = new GameObject[27];
         materialList = new Material[27];
         for (int i = 0; i < 3; ++i)
@@ -78,20 +71,25 @@ public class GameController : MonoBehaviour
                 }
             }
         }
-
         numList = new GameObject[27];
+
+        Restart();
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
+        if (inGame && Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
         {
             Ray raycast = Camera.main.ScreenPointToRay(Input.GetTouch(0).position);
             RaycastHit raycastHit;
             if (Physics.Raycast(raycast, out raycastHit))
             {
-                if(System.Math.Abs(raycastHit.collider.transform.localPosition.x) > EPSILON)
+                if (!raycastHit.transform.name.Contains("Capsule"))
+                {
+                    //do nothing
+                }
+                else if (System.Math.Abs(raycastHit.collider.transform.localPosition.x) > EPSILON)
                 {
                     Move(0, raycastHit.collider.transform.localPosition.x > 0);
                 }
@@ -106,7 +104,7 @@ public class GameController : MonoBehaviour
             }
         }
 
-        if (Input.touchCount == 1)
+        if (inGame && Input.touchCount == 1)
         {
             float rotateSpeed = 0.09f;
             Touch touchZero = Input.GetTouch(0);
@@ -140,6 +138,10 @@ public class GameController : MonoBehaviour
                             text.GetComponent<TextMesh>().text = value[i, j, k].ToString();
                             numList[i * 9 + j * 3 + k] = text;
                             materialList[i * 9 + j * 3 + k].color = (Color)colors[(int)Mathf.Log(value[i, j, k], 2)];
+                            if(!CheckAlive())
+                            {
+                                Endgame();
+                            }
                         }
 
                         numList[i * 9 + j * 3 + k].GetComponent<TextMesh>().transform.LookAt(
@@ -164,9 +166,19 @@ public class GameController : MonoBehaviour
         needUpdate = false;
     }
 
-    void Move(int dir, bool pos)
+    bool CheckAlive()
     {
-        Debug.Log("move: "+dir+", "+(pos?"POS":"NEG"));
+        bool canMove = false;
+        for(int i = 0; i < 6 && !canMove; ++i)
+        {
+            canMove = Move(i/2, i%2==0, false);
+        }
+        return canMove;
+    }
+
+    bool Move(int dir, bool pos, bool performAction = true)
+    {
+        Debug.Log("move: "+dir + ", " + (pos ? "POS" : "NEG") + ", " + (performAction ? "action" : "no-action"));
         bool moved = false;
         switch (dir)
         {
@@ -185,8 +197,11 @@ public class GameController : MonoBehaviour
                                     {
                                         if (value[finder, j, k] != 0)
                                         {
-                                            value[i, j, k] = value[finder, j, k];
-                                            value[finder, j, k] = 0;
+                                            if (performAction)
+                                            {
+                                                value[i, j, k] = value[finder, j, k];
+                                                value[finder, j, k] = 0;
+                                            }
                                             moved = true;
                                             break;
                                         }
@@ -199,8 +214,11 @@ public class GameController : MonoBehaviour
                                     {
                                         if (value[finder, j, k] == value[i, j, k])
                                         {
-                                            value[i, j, k] *= 2;
-                                            value[finder, j, k] = 0;
+                                            if (performAction)
+                                            {
+                                                value[i, j, k] *= 2;
+                                                value[finder, j, k] = 0;
+                                            }
                                             moved = true;
                                             break;
                                         }
@@ -228,9 +246,12 @@ public class GameController : MonoBehaviour
                                     {
                                         if(value[finder, j, k] != 0)
                                         {
+                                            if (performAction)
+                                            {
+                                                value[i, j, k] = value[finder, j, k];
+                                                value[finder, j, k] = 0;
+                                            }
                                             moved = true;
-                                            value[i, j, k] = value[finder, j, k];
-                                            value[finder, j, k] = 0;
                                             break;
                                         }
                                     }
@@ -242,9 +263,12 @@ public class GameController : MonoBehaviour
                                     {
                                         if (value[finder, j, k] == value[i, j, k])
                                         {
+                                            if (performAction)
+                                            {
+                                                value[i, j, k] *= 2;
+                                                value[finder, j, k] = 0;
+                                            }
                                             moved = true;
-                                            value[i, j, k] *= 2;
-                                            value[finder, j, k] = 0;
                                             break;
                                         }
                                         if (value[finder, j, k] != 0)
@@ -273,9 +297,12 @@ public class GameController : MonoBehaviour
                                     {
                                         if (value[i, finder, k] != 0)
                                         {
+                                            if (performAction)
+                                            {
+                                                value[i, j, k] = value[i, finder, k];
+                                                value[i, finder, k] = 0;
+                                            }
                                             moved = true;
-                                            value[i, j, k] = value[i, finder, k];
-                                            value[i, finder, k] = 0;
                                             break;
                                         }
                                     }
@@ -287,9 +314,12 @@ public class GameController : MonoBehaviour
                                     {
                                         if (value[i, j, k] == value[i, finder, k])
                                         {
+                                            if (performAction)
+                                            {
+                                                value[i, j, k] *= 2;
+                                                value[i, finder, k] = 0;
+                                            }
                                             moved = true;
-                                            value[i, j, k] *= 2;
-                                            value[i, finder, k] = 0;
                                             break;
                                         }
                                         if (value[i, finder, k] != 0)
@@ -316,9 +346,12 @@ public class GameController : MonoBehaviour
                                     {
                                         if (value[i, finder, k] != 0)
                                         {
+                                            if (performAction)
+                                            {
+                                                value[i, j, k] = value[i, finder, k];
+                                                value[i, finder, k] = 0;
+                                            }
                                             moved = true;
-                                            value[i, j, k] = value[i, finder, k];
-                                            value[i, finder, k] = 0;
                                             break;
                                         }
                                     }
@@ -330,9 +363,12 @@ public class GameController : MonoBehaviour
                                     {
                                         if (value[i, j, k] == value[i, finder, k])
                                         {
+                                            if (performAction)
+                                            {
+                                                value[i, j, k] *= 2;
+                                                value[i, finder, k] = 0;
+                                            }
                                             moved = true;
-                                            value[i, j, k] *= 2;
-                                            value[i, finder, k] = 0;
                                             break;
                                         }
                                         if (value[i, finder, k] != 0)
@@ -361,9 +397,12 @@ public class GameController : MonoBehaviour
                                     {
                                         if (value[i, j, finder] != 0)
                                         {
+                                            if (performAction)
+                                            {
+                                                value[i, j, k] = value[i, j, finder];
+                                                value[i, j, finder] = 0;
+                                            }
                                             moved = true;
-                                            value[i, j, k] = value[i, j, finder];
-                                            value[i, j, finder] = 0;
                                             break;
                                         }
                                     }
@@ -375,9 +414,12 @@ public class GameController : MonoBehaviour
                                     {
                                         if (value[i, j, finder] == value[i, j, k])
                                         {
+                                            if (performAction)
+                                            {
+                                                value[i, j, k] *= 2;
+                                                value[i, j, finder] = 0;
+                                            }
                                             moved = true;
-                                            value[i, j, k] *= 2;
-                                            value[i, j, finder] = 0;
                                             break;
                                         }
                                         if (value[i, j, finder] != 0)
@@ -404,9 +446,12 @@ public class GameController : MonoBehaviour
                                     {
                                         if (value[i, j, finder] != 0)
                                         {
+                                            if (performAction)
+                                            {
+                                                value[i, j, k] = value[i, j, finder];
+                                                value[i, j, finder] = 0;
+                                            }
                                             moved = true;
-                                            value[i, j, k] = value[i, j, finder];
-                                            value[i, j, finder] = 0;
                                             break;
                                         }
                                     }
@@ -418,9 +463,12 @@ public class GameController : MonoBehaviour
                                     {
                                         if (value[i, j, finder] == value[i, j, k])
                                         {
+                                            if (performAction)
+                                            {
+                                                value[i, j, k] *= 2;
+                                                value[i, j, finder] = 0;
+                                            }
                                             moved = true;
-                                            value[i, j, k] *= 2;
-                                            value[i, j, finder] = 0;
                                             break;
                                         }
                                         if (value[i, j, finder] != 0)
@@ -436,11 +484,12 @@ public class GameController : MonoBehaviour
                 break;
         }
 
-        if (moved)
+        if (moved && performAction)
         {
             RandomAdd();
             needUpdate = true;
         }
+        return moved;
     }
 
     void RandomAdd()
@@ -454,5 +503,25 @@ public class GameController : MonoBehaviour
                 break;
             }
         }
+    }
+
+    void Endgame()
+    {
+        inGame = false;
+        endGameUICanvas.SetActive(true);
+    }
+
+    public void Restart()
+    {
+        value = new int[3, 3, 3]  {
+                                    { { 0,0,0 }, { 0,0,0 } , { 0,0,0 } },
+                                    { { 0,0,0 }, { 0,0,0 } , { 0,0,0 } },
+                                    { { 0,0,0 }, { 0,0,0 } , { 0,0,0 } }
+                                  };
+
+        RandomAdd();
+        needUpdate = true;
+        inGame = true;
+        endGameUICanvas.SetActive(false);
     }
 }
