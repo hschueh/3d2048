@@ -204,6 +204,10 @@ public class GameController : MonoBehaviour
                                             moved = true;
                                             break;
                                         }
+                                        if (value[finder, j, k] != 0)
+                                        {
+                                            break;
+                                        }
                                     }
                                 }
                             }
@@ -241,6 +245,10 @@ public class GameController : MonoBehaviour
                                             moved = true;
                                             value[i, j, k] *= 2;
                                             value[finder, j, k] = 0;
+                                            break;
+                                        }
+                                        if (value[finder, j, k] != 0)
+                                        {
                                             break;
                                         }
                                     }
@@ -284,6 +292,10 @@ public class GameController : MonoBehaviour
                                             value[i, finder, k] = 0;
                                             break;
                                         }
+                                        if (value[i, finder, k] != 0)
+                                        {
+                                            break;
+                                        }
                                     }
                                 }
                             }
@@ -321,6 +333,10 @@ public class GameController : MonoBehaviour
                                             moved = true;
                                             value[i, j, k] *= 2;
                                             value[i, finder, k] = 0;
+                                            break;
+                                        }
+                                        if (value[i, finder, k] != 0)
+                                        {
                                             break;
                                         }
                                     }
@@ -364,6 +380,10 @@ public class GameController : MonoBehaviour
                                             value[i, j, finder] = 0;
                                             break;
                                         }
+                                        if (value[i, j, finder] != 0)
+                                        {
+                                            break;
+                                        }
                                     }
                                 }
                             }
@@ -401,6 +421,10 @@ public class GameController : MonoBehaviour
                                             moved = true;
                                             value[i, j, k] *= 2;
                                             value[i, j, finder] = 0;
+                                            break;
+                                        }
+                                        if (value[i, j, finder] != 0)
+                                        {
                                             break;
                                         }
                                     }
