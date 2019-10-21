@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using GoogleMobileAds.Api;
 
-public class game_controller : MonoBehaviour
+public class GameController : MonoBehaviour
 {
     const float EPSILON = 0.1f;
     int[,,] value;
@@ -16,7 +16,7 @@ public class game_controller : MonoBehaviour
     private void RequestBanner()
     {
         // Create a 320x50 banner at the top of the screen.
-        bannerView = new BannerView(bannerId, AdSize.SmartBanner, AdPosition.BottomLeft);
+        bannerView = new BannerView(Constants.bannerId, AdSize.SmartBanner, AdPosition.BottomLeft);
 
         // Create an empty ad request.
         AdRequest request = new AdRequest.Builder().Build();
@@ -24,16 +24,6 @@ public class game_controller : MonoBehaviour
         // Load the banner with the request.
         bannerView.LoadAd(request);
     }
-#if UNITY_ANDROID
-    string appId = "ca-app-pub-3940256099942544~3347511713";
-    string bannerId = "ca-app-pub-3940256099942544/6300978111";
-#elif UNITY_IPHONE
-    string appId = "ca-app-pub-3940256099942544~1458002511";
-    string bannerId = "ca-app-pub-3940256099942544/2934735716";
-#else
-    string appId = "unexpected_platform";
-    string bannerId = "unexpected_platform";
-#endif
 
     Color[] colors = {
         new Color32(192, 180, 164, 96),
@@ -62,7 +52,7 @@ public class game_controller : MonoBehaviour
 
     void Start()
     {
-        MobileAds.Initialize(appId);
+        MobileAds.Initialize(Constants.appId);
         RequestBanner();
 
         value = new int[3, 3, 3]  {
