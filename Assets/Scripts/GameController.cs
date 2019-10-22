@@ -55,8 +55,8 @@ public class GameController : MonoBehaviour
 
     void Start()
     {
-        //MobileAds.Initialize(Constants.appId);
-        //RequestBanner();
+        MobileAds.Initialize(Constants.appId);
+        RequestBanner();
 
         textPrefab = GameObject.Find("Text Prefab");
         endGameUICanvas = GameObject.Find("EndGameUICanvas");
