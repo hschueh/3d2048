@@ -1,10 +1,14 @@
 ﻿using UnityEngine;
 using GoogleMobileAds.Api;
+using System.Collections.Generic;
+using UnityEngine.UI;
 
 public class GameController : MonoBehaviour
 {
     const float EPSILON = 0.1f;
     int[,,] value;
+    int maxValue = 2;
+    List<int> randomPool;
     bool needUpdate = false;
     bool inGame = false;
     GameObject textPrefab;
@@ -14,6 +18,8 @@ public class GameController : MonoBehaviour
     Material[] materialList;
     Animator[] animatorList;
     int[] animatorStateList;
+    GameObject scoreObj;
+    int score;
 
     private BannerView bannerView;
     private void RequestBanner()
@@ -60,6 +66,8 @@ public class GameController : MonoBehaviour
 
         textPrefab = GameObject.Find("Text Prefab");
         endGameUICanvas = GameObject.Find("EndGameUICanvas");
+        scoreObj = GameObject.Find("ScoreText");
+
         cubeList = new GameObject[27];
         materialList = new Material[27];
         animatorList = new Animator[27];
@@ -139,6 +147,10 @@ public class GameController : MonoBehaviour
                             GameObject text = Object.Instantiate(textPrefab);
                             text.transform.parent = cube.transform;
                             text.transform.position = cube.transform.position;
+                            if (Mathf.Log10(value[i, j, k]) > 5)
+                                text.transform.localScale = text.transform.localScale * 0.25f;
+                            else if (Mathf.Log10(value[i, j, k]) > 3)
+                                text.transform.localScale = text.transform.localScale*0.5f;
                             text.GetComponent<TextMesh>().text = value[i, j, k].ToString();
                             numList[i * 9 + j * 3 + k] = text;
                             materialList[i * 9 + j * 3 + k].color = (Color)colors[(int)Mathf.Log(value[i, j, k], 2)];
@@ -232,6 +244,8 @@ public class GameController : MonoBehaviour
                                                 value[i, j, k] *= 2;
                                                 value[finder, j, k] = 0;
                                                 animatorStateList[9 * i + 3 * j + k] = 1;
+                                                maxValue = Mathf.Max(value[i, j, k], maxValue);
+                                                score += value[i, j, k];
                                             }
                                             moved = true;
                                             break;
@@ -282,6 +296,8 @@ public class GameController : MonoBehaviour
                                                 value[i, j, k] *= 2;
                                                 value[finder, j, k] = 0;
                                                 animatorStateList[9 * i + 3 * j + k] = 1;
+                                                maxValue = Mathf.Max(value[i, j, k], maxValue);
+                                                score += value[i, j, k];
                                             }
                                             moved = true;
                                             break;
@@ -334,6 +350,8 @@ public class GameController : MonoBehaviour
                                                 value[i, j, k] *= 2;
                                                 value[i, finder, k] = 0;
                                                 animatorStateList[9 * i + 3 * j + k] = 1;
+                                                maxValue = Mathf.Max(value[i, j, k], maxValue);
+                                                score += value[i, j, k];
                                             }
                                             moved = true;
                                             break;
@@ -383,7 +401,9 @@ public class GameController : MonoBehaviour
                                             {
                                                 value[i, j, k] *= 2;
                                                 value[i, finder, k] = 0;
-                                                animatorStateList[9 * i + 3 * j + k] = 1; ;
+                                                animatorStateList[9 * i + 3 * j + k] = 1;
+                                                maxValue = Mathf.Max(value[i, j, k], maxValue);
+                                                score += value[i, j, k];
                                             }
                                             moved = true;
                                             break;
@@ -436,6 +456,8 @@ public class GameController : MonoBehaviour
                                                 value[i, j, k] *= 2;
                                                 value[i, j, finder] = 0;
                                                 animatorStateList[9 * i + 3 * j + k] = 1;
+                                                maxValue = Mathf.Max(value[i, j, k], maxValue);
+                                                score += value[i, j, k];
                                             }
                                             moved = true;
                                             break;
@@ -486,6 +508,8 @@ public class GameController : MonoBehaviour
                                                 value[i, j, k] *= 2;
                                                 value[i, j, finder] = 0;
                                                 animatorStateList[9 * i + 3 * j + k] = 1;
+                                                maxValue = Mathf.Max(value[i, j, k], maxValue);
+                                                score += value[i, j, k];
                                             }
                                             moved = true;
                                             break;
@@ -505,10 +529,28 @@ public class GameController : MonoBehaviour
 
         if (moved && performAction)
         {
+            UpdateRandomPool();
             RandomAdd();
             needUpdate = true;
+            scoreObj.GetComponent<Text>().text = "Score: " + score;
         }
         return moved;
+    }
+
+    void UpdateRandomPool()
+    {
+        if(System.Math.Abs(randomPool.Count - Mathf.Log(maxValue, 2)) > EPSILON)
+        {
+            int toAdd = Mathf.FloorToInt(Mathf.Sqrt(maxValue));
+            if (Mathf.IsPowerOfTwo(toAdd))
+            {
+                randomPool.Add(toAdd);
+            }
+            else
+            {
+                randomPool.Add(randomPool[randomPool.Count-1]);
+            }
+        }
     }
 
     void RandomAdd()
@@ -518,10 +560,15 @@ public class GameController : MonoBehaviour
             int x = Mathf.FloorToInt((Random.value * 3f) % 3), y = Mathf.FloorToInt((Random.value * 3f) % 3), z = Mathf.FloorToInt((Random.value * 3f) % 3);
             if (value[x, y, z] == 0)
             {
-                value[x, y, z] = 2;
+                value[x, y, z] = GetNewNum();
                 break;
             }
         }
+    }
+
+    int GetNewNum()
+    {
+        return randomPool[Mathf.FloorToInt(Random.value * randomPool.Count) % randomPool.Count];
     }
 
     void Endgame()
@@ -537,10 +584,14 @@ public class GameController : MonoBehaviour
                                     { { 0,0,0 }, { 0,0,0 } , { 0,0,0 } },
                                     { { 0,0,0 }, { 0,0,0 } , { 0,0,0 } }
                                   };
+        randomPool = new List<int>();
+        randomPool.Add(2);
+        maxValue = 2;
         animatorStateList = new int[27];
         RandomAdd();
         needUpdate = true;
         inGame = true;
         endGameUICanvas.SetActive(false);
+        score = 0;
     }
 }
